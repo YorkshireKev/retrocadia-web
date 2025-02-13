@@ -1,33 +1,112 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-<title>manicmoo.com</title>
-<style type="text/css">
-.centered {
-    margin: 0;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-  font-family: Arial, Helvetica, sans-serif;
-}
-a {
-    color: rgb(52, 74, 201);
-}
-</style>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no" />
+    <title>Retrocadia</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            background-color: black;
+            color: white;
+        }
+
+        #canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        #loading-wrapper {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        #loading-text {
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        #progress-bar {
+            width: 300px;
+            height: 10px;
+            background-color: #e3c280;
+            border: 1px solid #f49a09;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        #progress-bar-inner {
+            width: 0%;
+            height: 100%;
+            background-color: #2acd53;
+            transition: width 0.5s linear;
+        }
+    </style>
+    <link rel="icon" href="retrocadia.icon.png" />
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-RLG8ENNPM1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-RLG8ENNPM1');
+    </script>
 </head>
-<body style="background-color:rgb(245, 243, 237);">
-<div class="centered">
-<h2>Retrocadia v0.1 Experimental Web Build</h2>
-<p>Please note that the browser based version of Retrocadia uses Web Assembly, which at the time this build was created (2019)
-is still a fairly new and experimental browser feature.</p>
-<p>Not all browsers will be able to load and run the game. Once the game is loaded you may need to click on the
-title screen before the game will recieve keyboard input. In some browsers the game can appear jittery after first loading,
-though it does appear to settle down after a few minutes.</p>
-<h3><a href="retrocadia.html">Click here to proceed and attempt to load Retrocadia Web into your browser</a></h3>
-<p>A stable downloadable version of Retrocadia is available Windows, Mac and Linux.
-    You can get it from itch.io: <a href="https://yorkshirekev.itch.io/retrocadia">https://yorkshirekev.itch.io/retrocadia</a></p>
-</div>
+
+<body>
+    <canvas id="canvas">
+        HTML5 canvas appears to be unsupported in this browser. Please update or try a different browser.
+    </canvas>
+
+    <div id="loading-wrapper">
+        <div id="loading-text">Retrocadia is Loading</div>
+        <div id="progress-bar">
+            <div id="progress-bar-inner"></div>
+        </div>
+    </div>
+
+    <script src="retrocadia.js"></script>
+    <script>
+        // Configuration and initialisation
+        const GODOT_CONFIG = {
+            "args": [],
+            "canvasResizePolicy": 2,
+            "executable": "retrocadia",
+            "experimentalVK": false,
+            "fileSizes": { "retrocadia.pck":1666160,"retrocadia.wasm":19761972 }, "focusCanvas": true, "gdnativeLibs": [] };
+
+        const progressBarInner = document.getElementById("progress-bar-inner");
+        const loadingWrapper = document.getElementById("loading-wrapper");
+
+        // Initialize the game engine
+        const engine = new Engine(GODOT_CONFIG);
+
+        // Start the game with progress handling
+        engine.startGame({
+            onProgress: (current, total) => {
+                if (total > 0) {
+                    const progress = (current / total) * 100;
+                    progressBarInner.style.width = `${progress}%`;
+
+                    // Hide loading elements once loading completes
+                    if (current === total) {
+                        setTimeout(() => loadingWrapper.style.display = "none", 500);
+                    }
+                }
+            },
+        }).catch(err => {
+            console.error("Error starting the game:", err);
+            alert("Failed to load the game. Check the console for details.");
+        });
+    </script>
 </body>
+
 </html>
